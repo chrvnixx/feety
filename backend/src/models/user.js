@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    userName: {
+    username: {
       type: String,
       required: true,
       trim: true,
@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+      minlength: [6, "password must be at least 6 characters"],
     },
 
     cartItems: [
@@ -32,7 +33,7 @@ const userSchema = new mongoose.Schema(
         },
         product: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: product,
+          ref: "Product",
         },
       },
     ],
@@ -71,6 +72,6 @@ userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-const User = new mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

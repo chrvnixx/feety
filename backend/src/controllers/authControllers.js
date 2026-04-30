@@ -28,10 +28,6 @@ export async function signup(req, res) {
 
     await user.save();
 
-    const { accessToken, refreshToken } = generateToken(user._id);
-    saveRefreshToken(user._id, refreshToken);
-    setCookies(res, accessToken, refreshToken);
-
     res.status(201).json({
       message: "user created",
       user: { ...user._doc, password: undefined },
@@ -39,5 +35,34 @@ export async function signup(req, res) {
   } catch (error) {
     res.status(500).json({ message: "Internal server Error" });
     console.log("Error in signup controller", error);
+  }
+}
+
+export async function login(req, res) {
+  const { email, password } = req.body;
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "all fields are required" });
+    }
+
+    const user = User.findOne({ email });
+
+    if (user && user.comparePassword) {
+      const { accessToken, refreshToken } = generateToken(user._id);
+      saveRefreshToken(user._id, refreshToken);
+      setCookies(res, accessToken, refreshToken);
+
+      return res
+        .status(200)
+        .json({
+          message: "logged in successfully",
+          user: { ...user._doc, password: undefined },
+        });
+    } else{
+      return res.status(400).json({message:"Invalid credentials"})
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal server Error" });
+    console.log("Error in login controller", error);
   }
 }

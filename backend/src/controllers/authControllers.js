@@ -1,6 +1,8 @@
+import { redis } from "../config/upstash.js";
 import User from "../models/user.js";
 import generateToken from "../utils/generateToken.js";
 import { saveRefreshToken, setCookies } from "../utils/saveRefreshToken.js";
+import jwt from "jsonwebtoken";
 
 export async function signup(req, res) {
   const { email, fullName, username, password } = req.body;
@@ -52,17 +54,33 @@ export async function login(req, res) {
       saveRefreshToken(user._id, refreshToken);
       setCookies(res, accessToken, refreshToken);
 
-      return res
-        .status(200)
-        .json({
-          message: "logged in successfully",
-          user: { ...user._doc, password: undefined },
-        });
-    } else{
-      return res.status(400).json({message:"Invalid credentials"})
+      return res.status(200).json({
+        message: "logged in successfully",
+        user: { ...user._doc, password: undefined },
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
   } catch (error) {
     res.status(500).json({ message: "Internal server Error" });
     console.log("Error in login controller", error);
+  }
+}
+
+export async function logout(req, res) {
+  const refreshToken = req.cookies.refreshToken;
+  try {
+    if (refreshToken) {
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      await redis.del(`refresh_token:${decoded.userId}`);
+    }
+
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    res.json({ message: "user logged out" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server Error" });
+    console.log("Error in logout controller", error);
   }
 }

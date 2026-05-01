@@ -84,3 +84,28 @@ export async function logout(req, res) {
     console.log("Error in logout controller", error);
   }
 }
+
+export async function resetPassword(req,res){
+  const {email,password} = req.body
+  try {
+   const user = await User.findOne({email})
+
+   if(!user){
+    return res.status(404).json({message:"user not found"})
+   }
+
+   if(password === user.password){
+    return res.status(400).json({message:"Can't use"})
+   }
+
+   user.password = password
+
+   await user.save()
+
+   res.status(200).json({message:"password reset successfull"})
+
+  } catch (error) {
+    res.status(500).json({ message: "Internal server Error" });
+    console.log("Error in resetPassword controller", error);
+  }
+}

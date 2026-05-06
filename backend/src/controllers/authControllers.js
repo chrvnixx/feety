@@ -47,7 +47,7 @@ export async function login(req, res) {
       return res.status(400).json({ message: "all fields are required" });
     }
 
-    const user = User.findOne({ email });
+    const user = await User.findOne({ email });
 
     if (user && user.comparePassword) {
       const { accessToken, refreshToken } = generateToken(user._id);
@@ -133,7 +133,7 @@ export async function refreshToken(req, res) {
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === production,
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 15 * 60 * 1000,
     });

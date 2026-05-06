@@ -112,6 +112,10 @@ export async function resetPassword(req, res) {
   }
 }
 
+export async function checkAuth(req,res){
+  
+}
+
 export async function refreshToken(req, res) {
   const refreshToken = req.cookies.refreshToken;
   try {

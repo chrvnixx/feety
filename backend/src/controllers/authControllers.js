@@ -137,8 +137,9 @@ export async function refreshToken(req, res) {
       sameSite: "strict",
       maxAge: 15 * 60 * 1000,
     });
+    res.status(200).json({ message: "token refreshed" });
   } catch (error) {
     res.status(500).json({ message: "Internal server Error" });
-    console.log("Error in resetPassword controller", error);
+    console.log("Error in refresh token controller", error);
   }
 }

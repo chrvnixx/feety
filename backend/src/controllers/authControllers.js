@@ -95,7 +95,7 @@ export async function resetPassword(req,res){
    }
 
    if(password === user.password){
-    return res.status(400).json({message:"Can't use"})
+    return res.status(400).json({message:"Can't use an old password"})
    }
 
    user.password = password

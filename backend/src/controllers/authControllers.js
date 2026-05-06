@@ -85,25 +85,58 @@ export async function logout(req, res) {
   }
 }
 
-export async function resetPassword(req,res){
-  const {email,password} = req.body
+export async function resetPassword(req, res) {
+  const { email, password } = req.body;
   try {
-   const user = await User.findOne({email})
+    const user = await User.findOne({ email });
 
-   if(!user){
-    return res.status(404).json({message:"user not found"})
-   }
+    if (!user) {
+      return res.status(404).json({ message: "user not found" });
+    }
 
-   if(password === user.password){
-    return res.status(400).json({message:"Can't use an old password"})
-   }
+    if (password === user.password) {
+      return res.status(400).json({ message: "Can't use an old password" });
+    }
 
-   user.password = password
+    user.password = password;
 
-   await user.save()
+    await user.save();
 
-   res.status(200).json({message:"password reset successfull"})
+    res.status(200).json({
+      message: "password reset successfull",
+      user: { ...user._doc, password: undefined },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server Error" });
+    console.log("Error in resetPassword controller", error);
+  }
+}
 
+export async function refreshToken(req, res) {
+  const refreshToken = req.cookies.refreshToken;
+  try {
+    if (!refreshToken) {
+      res.status(404).json({ message: "Unauthorised - Token not found" });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+
+    if (!decoded) {
+      res.status(400).json({ message: "Unauthorised - Token not found" });
+    }
+
+    const userId = decoded.userId;
+
+    const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    });
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === production,
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+    });
   } catch (error) {
     res.status(500).json({ message: "Internal server Error" });
     console.log("Error in resetPassword controller", error);

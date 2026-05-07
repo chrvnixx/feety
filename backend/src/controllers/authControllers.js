@@ -112,8 +112,19 @@ export async function resetPassword(req, res) {
   }
 }
 
-export async function checkAuth(req,res){
-  
+export async function checkAuth(req, res) {
+  const userId = req.userId;
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+    res.status(200).json({ user: { ...user._doc, password: undefined } });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server Error" });
+    console.log("Error in check auth controller", error);
+  }
 }
 
 export async function refreshToken(req, res) {

@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
-import User from "../src/models/user";
+import User from "../models/user.js";
 
 export async function protectRoute(req, res, next) {
-  const accessToken = req.cookie.accessToken;
+  const accessToken = req.cookies.accessToken;
   try {
     if (!accessToken) {
       return res
@@ -16,6 +16,7 @@ export async function protectRoute(req, res, next) {
     }
 
     req.userId = decoded.userId;
+    console.log(req.userId);
 
     next();
   } catch (error) {

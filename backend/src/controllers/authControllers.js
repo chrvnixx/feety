@@ -94,10 +94,6 @@ export async function resetPassword(req, res) {
       return res.status(404).json({ message: "user not found" });
     }
 
-    if (password === user.password) {
-      return res.status(400).json({ message: "Can't use an old password" });
-    }
-
     user.password = password;
 
     await user.save();
